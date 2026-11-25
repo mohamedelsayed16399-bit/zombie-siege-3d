@@ -215,6 +215,26 @@ const PK=[["hp","❤️","صحة أقصى +١٠٪",150],["dmg","🔫","ضرر +�
 function shopR(){$("shw").textContent="رصيدك: 🪙 "+AR(wallet);const c=$("shc");c.innerHTML="";PK.forEach(p=>{const lv=meta[p[0]],cost=p[3]*(lv+1),b=document.createElement("button");b.className="card";b.innerHTML="<b>"+p[1]+"</b>"+p[2]+"<br>مستوى "+AR(lv)+"/٨<br>"+(lv>=8?"أقصى":"🪙 "+AR(cost));b.onclick=()=>{if(lv<8&&wallet>=cost){wallet-=cost;meta[p[0]]++;try{localStorage.zsCoins=wallet;localStorage.zsMeta=JSON.stringify(meta)}catch(e){}shopR();wal()}};c.appendChild(b)})}
 function wal(){$("wal").textContent="🪙 "+AR(wallet)}wal();$("shopb").onclick=$("shopb2").onclick=()=>{shopR();$("shop").classList.add("on")};$("shx").onclick=()=>{$("shop").classList.remove("on");wal()};
 document.querySelectorAll("#dif button").forEach(b=>b.onclick=()=>{diff=+b.dataset.d;document.querySelectorAll("#dif button").forEach(x=>x.classList.toggle("on",x==b))});
+
+/* ---- achievements ---- */
+const AK="zsAch1";let AS={kills:0,boss:0,games:0,lvl:0,combo:0,done:{}};try{Object.assign(AS,JSON.parse(localStorage.getItem(AK)||"{}"))}catch(e){}
+const ACH=[["k1","🩸","قاتل مبتدئ","اقتل ١٠٠ زومبي","kills",100,100],["k2","💀","صياد","اقتل ٥٠٠ زومبي","kills",500,300],["k3","☠️","كابوس الزومبي","اقتل ٢٠٠٠ زومبي","kills",2000,800],
+["b1","👹","قاتل الزعماء","اقتل زعيم","boss",1,150],["b2","🏆","سيد الزعماء","اقتل ٥ زعماء","boss",5,500],
+["l1","🛡️","صامد","وصّل للموجة ٥","lvl",5,100],["l2","⚔️","محارب","وصّل للموجة ١٠","lvl",10,300],["l3","🔥","أسطورة","وصّل للموجة ١٥","lvl",15,600],["l4","👑","لا يُقهر","وصّل للموجة ٢٠","lvl",20,1000],
+["c1","⚡","سلسلة نار","سلسلة ٢٥ قتلة","combo",25,150],["c2","🌪️","إعصار","سلسلة ٥٠ قتلة","combo",50,400],["g1","🎮","مدمن","العب ١٠ مرات","games",10,200]];
+function aSave(){try{localStorage.setItem(AK,JSON.stringify(AS))}catch(e){}}
+let aQ=[],aBusy=false;function aToast(a){aQ.push(a);if(aBusy)return;const nx=()=>{const x=aQ.shift();if(!x){aBusy=false;return}aBusy=true;let t=document.getElementById("atoast");if(!t){t=document.createElement("div");t.id="atoast";t.style.cssText="position:fixed;top:70px;left:50%;transform:translate(-50%,-30px);background:linear-gradient(90deg,#f97316,#fbbf24);color:#111;font-weight:900;padding:10px 18px;border-radius:14px;z-index:30;opacity:0;transition:.35s;text-align:center;box-shadow:0 6px 24px #0008;pointer-events:none;font-family:inherit";document.body.appendChild(t)}
+ t.innerHTML="🏅 إنجاز جديد! "+x[1]+" "+x[2]+"<br><small>+"+AR(x[6])+" 🪙</small>";t.style.opacity=1;t.style.transform="translate(-50%,0)";setTimeout(()=>{t.style.opacity=0;t.style.transform="translate(-50%,-30px)";setTimeout(nx,400)},2600)};nx()}
+function aCheck(){for(const a of ACH){if(!AS.done[a[0]]&&AS[a[4]]>=a[5]){AS.done[a[0]]=1;wallet+=a[6];try{localStorage.zsCoins=wallet}catch(e){}try{wal()}catch(e){}aToast(a)}}aSave()}
+const _hitZ=hitZ;hitZ=function(z,d,c){const was=z.dead;_hitZ(z,d,c);if(!was&&z.dead){AS.kills++;if(z.t=="boss")AS.boss++;if(combo>AS.combo)AS.combo=combo;aCheck()}};
+const _nextLevel=nextLevel;nextLevel=function(){_nextLevel();if(level>AS.lvl){AS.lvl=level;aCheck()}};
+const _hurt=hurt;hurt=function(d){const was=P&&P.dead;_hurt(d);if(P&&P.dead&&!was){AS.games++;aCheck()}};
+function aShow(){let o=document.getElementById("achov");if(!o){o=document.createElement("div");o.className="ov";o.id="achov";o.style.zIndex=8;document.body.appendChild(o)}
+ const n=ACH.filter(a=>AS.done[a[0]]).length;
+ o.innerHTML='<h1 style="font-size:28px;color:#fbbf24">🏅 الإنجازات ('+AR(n)+'/'+AR(ACH.length)+')</h1><p style="margin:2px 0 8px">قتلت '+AR(AS.kills)+' زومبي · '+AR(AS.boss)+' زعيم · أعلى موجة '+AR(AS.lvl)+' · أطول سلسلة '+AR(AS.combo)+'</p><div style="width:100%;max-width:420px;max-height:62vh;overflow:auto;display:flex;flex-direction:column;gap:8px">'+ACH.map(a=>{const done=AS.done[a[0]],v=Math.min(a[5],AS[a[4]]||0);return '<div style="display:flex;align-items:center;gap:10px;background:'+(done?'#3b2a08':'#1f2937')+';border:2px solid '+(done?'#fbbf24':'#374151')+';border-radius:12px;padding:8px 10px;text-align:right"><span style="font-size:26px;filter:'+(done?'none':'grayscale(1) opacity(.5)')+'">'+a[1]+'</span><div style="flex:1"><b>'+a[2]+'</b><div style="font-size:12px;opacity:.8">'+a[3]+'</div><div style="height:5px;background:#0006;border-radius:4px;margin-top:4px"><i style="display:block;height:100%;width:'+(v/a[5]*100)+'%;background:#f97316;border-radius:4px"></i></div></div><span style="font-size:13px;font-weight:800;color:'+(done?'#fbbf24':'#9ca3af')+'">'+(done?'✔':'+'+AR(a[6])+'🪙')+'</span></div>'}).join("")+'</div><button class="btn" id="achx" style="margin-top:12px">رجوع</button>';
+ o.classList.add("on");document.getElementById("achx").onclick=()=>o.classList.remove("on")}
+for(const id of ["go","again"]){const b=$(id);if(!b)continue;const x=document.createElement("button");x.className="btn";x.textContent="🏅 الإنجازات";x.style.cssText="padding:10px 30px;font-size:18px;background:#1f2937;box-shadow:none;border:2px solid #fbbf24;margin-top:8px";x.onclick=aShow;b.insertAdjacentElement("afterend",x)}
+window.ZA={AS,aCheck,aShow,ACH};
 $("pzb").addEventListener("pointerdown",pz);$("resume").onclick=pz;$("grn").addEventListener("pointerdown",grenade);
 $("bst").textContent=best?"🏆 أفضل نتيجة: "+AR(best):"";
 $("go").onclick=()=>{try{AC=AC||new(window.AudioContext||window.webkitAudioContext)()}catch(e){}$("start").classList.remove("on");newGame()};$("again").onclick=()=>{$("over").classList.remove("on");newGame()};
@@ -223,4 +243,5 @@ done.then(()=>{buildWorld();$("go").disabled=false;$("go").textContent="ابدأ
 </script>
 </body>
 </html>
+
 
