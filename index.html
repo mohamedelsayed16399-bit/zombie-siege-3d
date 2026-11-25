@@ -64,7 +64,8 @@ const ground=new THREE.Mesh(new THREE.PlaneGeometry(ARENA*2+20,ARENA*2+20),new T
 // load
 const FILES=["character_soldier","zombie_basic","zombie_chubby","zombie_ribcage","crate","exploding_barrel","container_long","barrier_large","tree_1","tree_2","debris_broken_car","street_light","health","vehicle_pickup"];
 const M={};let loaded=0;const loader=new GLTFLoader();
-const done=Promise.all(FILES.map(f=>new Promise((res,rej)=>loader.load(f+".glb",g=>{M[f]=g;$("bar").firstChild.style.width=(++loaded/FILES.length*100)+"%";res()},undefined,e=>rej(f)))));
+const ZP=["vehicle_pickup","zombie_basic","zombie_chubby","zombie_ribcage"];const GLB=f=>"https://cdn.jsdelivr.net/gh/Papyszoo/CC0-Public-Domain-Models@main/packs/quaternius-"+(ZP.includes(f)?"zombieapocalypsekit":"toonshootergamekit")+"/models/"+f+"/"+f+".glb";
+const done=Promise.all(FILES.map(f=>new Promise((res,rej)=>loader.load(GLB(f),g=>{M[f]=g;$("bar").firstChild.style.width=(++loaded/FILES.length*100)+"%";res()},undefined,e=>rej(f)))));
 function norm(root,target,axis){const b=new THREE.Box3().setFromObject(root),s=b.getSize(new THREE.Vector3());const m=axis=="h"?s.y:Math.max(s.x,s.z);const k=target/m;root.scale.multiplyScalar(k);root.updateMatrixWorld(true);const b2=new THREE.Box3().setFromObject(root);root.position.y-=b2.min.y;return root}
 function inst(name,target,axis="h"){const o=SU.clone(M[name].scene);o.traverse(c=>{if(c.isMesh){c.castShadow=true;c.receiveShadow=true;c.frustumCulled=false}});const g=new THREE.Group();g.add(o);norm(o,target,axis);return g}
 function rig(name,h){const g=inst(name,h);const o=g.children[0];const mixer=new THREE.AnimationMixer(o);const acts={};for(const c of M[name].animations){acts[c.name]=mixer.clipAction(c)}return{g,mixer,acts,cur:null}}
